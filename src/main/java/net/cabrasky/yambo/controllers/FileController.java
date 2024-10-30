@@ -2,6 +2,8 @@ package net.cabrasky.yambo.controllers;
 
 import net.cabrasky.yambo.models.FileMetadata;
 import net.cabrasky.yambo.services.FileService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -20,12 +22,8 @@ import java.util.Optional;
 @RequestMapping("/files")
 public class FileController {
 
-    private final FileService fileMetadataService;
-
-    public FileController(FileService fileMetadataService) {
-        this.fileMetadataService = fileMetadataService;
-    }
-
+    @Autowired
+    private FileService fileService;
     
 
     /**
@@ -40,7 +38,7 @@ public class FileController {
             @PathVariable String dir,
             @PathVariable String filename) {
 
-        Optional<FileMetadata> fileMetadataOpt = fileMetadataService.getLatestFileMetadata(filename, dir);
+        Optional<FileMetadata> fileMetadataOpt = fileService.getLatestFileMetadata(filename, dir);
         if (fileMetadataOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
