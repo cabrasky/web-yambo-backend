@@ -2,13 +2,13 @@ package net.cabrasky.yambo.controllers;
 
 import net.cabrasky.yambo.models.FileMetadata;
 import net.cabrasky.yambo.services.FileService;
-
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.AfterEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -38,25 +38,24 @@ class FileControllerTest {
     void setUp() throws IOException {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
-        
-        // Create a temporary file for testing
+
+        // Create a temporary file for testing purposes
         tempFile = Files.createTempFile("test-file", ".txt");
-        Files.writeString(tempFile, "This is a test file."); 
+        Files.writeString(tempFile, "This is a test file.");
     }
 
     @AfterEach
     void tearDown() throws IOException {
-        // Delete the temporary file after the test
-        Files.deleteIfExists(tempFile);
+        Files.deleteIfExists(tempFile); // Clean up temporary file after tests
     }
 
     @Test
-    void testDownloadFile() throws Exception {
+    void testDownloadFile_Successful() throws Exception {
         // Arrange
         FileMetadata fileMetadata = new FileMetadata();
         fileMetadata.setId(1L);
         fileMetadata.setFileName("test-file.txt");
-        fileMetadata.setRealPath(tempFile.toString());  // Set the real path to the temp file
+        fileMetadata.setRealPath(tempFile.toString());
         fileMetadata.setDirectory("files");
 
         when(fileService.getLatestFileMetadata("test-file.txt", "files"))
@@ -64,22 +63,40 @@ class FileControllerTest {
 
         // Act & Assert
         mockMvc.perform(get("/files/download/files/test-file.txt")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition", "attachment; filename=\"test-file.txt\""))
+                .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"test-file.txt\""))
                 .andExpect(content().contentType("text/plain"))
-                .andExpect(content().string("This is a test file."));  // Ensure content matches
+                .andExpect(content().string("This is a test file.")); // Validate file content
     }
 
     @Test
-    void testDownloadFileNotFound() throws Exception {
+    void testDownloadFile_NotFound() throws Exception {
         // Arrange
         when(fileService.getLatestFileMetadata("nonexistent.txt", "files"))
                 .thenReturn(Optional.empty());
 
         // Act & Assert
         mockMvc.perform(get("/files/download/files/nonexistent.txt")
-                        .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound()); // Expect 404 NOT FOUND
+    }
+
+    @Test
+    void testDownloadFile_InternalServerError() throws Exception {
+        // Arrange
+        FileMetadata fileMetadata = new FileMetadata();
+        fileMetadata.setId(3L);
+        fileMetadata.setFileName("corrupt-file.txt");
+        fileMetadata.setRealPath("invalid/path/corrupt-file.txt");
+        fileMetadata.setDirectory("files");
+
+        when(fileService.getLatestFileMetadata("corrupt-file.txt", "files"))
+                .thenReturn(Optional.of(fileMetadata));
+
+        // Act & Assert
+        mockMvc.perform(get("/files/download/files/corrupt-file.txt")
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 }

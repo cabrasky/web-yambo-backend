@@ -24,15 +24,7 @@ public class FileController {
 
     @Autowired
     private FileService fileService;
-    
 
-    /**
-     * Download a file by its name from the specified directory.
-     *
-     * @param dir      the directory where the file is located.
-     * @param filename the name of the file to be downloaded.
-     * @return a ResponseEntity containing the file as a resource or an error status.
-     */
     @GetMapping("/download/{dir}/{filename:.+}")
     public ResponseEntity<Resource> downloadFile(
             @PathVariable String dir,
@@ -46,22 +38,22 @@ public class FileController {
         FileMetadata fileMetadata = fileMetadataOpt.get();
         Path filePath = Paths.get(fileMetadata.getRealPath());
 
+        if (!Files.exists(filePath)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
         try {
             Resource resource = new UrlResource(filePath.toUri());
-            if (resource.exists() || resource.isReadable()) {
-                String contentType = Files.probeContentType(filePath);
-                if (contentType == null) {
-                    contentType = "application/octet-stream";
-                }
-
-                return ResponseEntity.ok()
-                        .header(HttpHeaders.CONTENT_DISPOSITION,
-                                "attachment; filename=\"" + filename + "\"")
-                        .header(HttpHeaders.CONTENT_TYPE, contentType)
-                        .body(resource);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "application/octet-stream";
             }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .header(HttpHeaders.CONTENT_TYPE, contentType)
+                    .body(resource);
+
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -70,4 +62,5 @@ public class FileController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }
