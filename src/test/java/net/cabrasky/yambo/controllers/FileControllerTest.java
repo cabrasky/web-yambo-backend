@@ -62,7 +62,7 @@ class FileControllerTest {
                 .thenReturn(Optional.of(fileMetadata));
 
         // Act & Assert
-        mockMvc.perform(get("/files/download/files/test-file.txt")
+        mockMvc.perform(get("/files/files/test-file.txt")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"test-file.txt\""))
@@ -77,7 +77,7 @@ class FileControllerTest {
                 .thenReturn(Optional.empty());
 
         // Act & Assert
-        mockMvc.perform(get("/files/download/files/nonexistent.txt")
+        mockMvc.perform(get("/files/files/nonexistent.txt")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound()); // Expect 404 NOT FOUND
     }
@@ -95,7 +95,7 @@ class FileControllerTest {
                 .thenReturn(Optional.of(fileMetadata));
 
         // Act & Assert
-        mockMvc.perform(get("/files/download/files/corrupt-file.txt")
+        mockMvc.perform(get("/files/files/corrupt-file.txt")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }

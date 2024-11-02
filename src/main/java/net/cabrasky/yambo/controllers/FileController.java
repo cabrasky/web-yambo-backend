@@ -25,7 +25,7 @@ public class FileController {
     @Autowired
     private FileService fileService;
 
-    @GetMapping("/download/{dir}/{filename:.+}")
+    @GetMapping("/{dir}/{filename:.+}")
     public ResponseEntity<Resource> downloadFile(
             @PathVariable String dir,
             @PathVariable String filename) {
