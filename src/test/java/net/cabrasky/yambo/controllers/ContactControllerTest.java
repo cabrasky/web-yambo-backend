@@ -52,7 +52,8 @@ class ContactControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Email sent successfully."));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))  // Verifica que la respuesta es JSON
+                .andExpect(jsonPath("$.message").value("Email sent successfully."));  // Verifica el campo "message" en el JSON de respuesta
     }
 
     @Test
@@ -74,6 +75,7 @@ class ContactControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestBody))
                 .andExpect(status().isInternalServerError())
-                .andExpect(content().string("Failed to send email: SMTP server error"));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))  // Verifica que la respuesta es JSON
+                .andExpect(jsonPath("$.error").value("Failed to send email: SMTP server error"));  // Verifica el campo "error" en el JSON de respuesta
     }
 }
