@@ -18,6 +18,12 @@ SPRING_DATASOURCE_USERNAME=db_user
 SPRING_DATASOURCE_PASSWORD=db_password
 JWT_SECRET=mysecretkey
 
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=example@example.com
+MAIL_PASSWORD=example_password
+EMAIL_RECIPIENT=example2@example.com
+
 # Configuración de directorios de subida de archivos
 FILE_UPLOAD_DIR=/ruta/a/directorio/de/archivos
 ```
