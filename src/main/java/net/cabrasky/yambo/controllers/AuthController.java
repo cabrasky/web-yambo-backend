@@ -1,6 +1,5 @@
 package net.cabrasky.yambo.controllers;
 
-import net.cabrasky.yambo.exceptions.UserNotEnabledException;
 import net.cabrasky.yambo.models.User;
 import net.cabrasky.yambo.payloads.request.AuthRequest;
 import net.cabrasky.yambo.payloads.response.AuthResponse;

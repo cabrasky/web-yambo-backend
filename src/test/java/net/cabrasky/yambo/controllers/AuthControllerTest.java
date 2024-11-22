@@ -2,7 +2,6 @@ package net.cabrasky.yambo.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.cabrasky.yambo.config.SecurityConfig;
-import net.cabrasky.yambo.exceptions.UserNotEnabledException;
 import net.cabrasky.yambo.models.User;
 import net.cabrasky.yambo.payloads.request.AuthRequest;
 import net.cabrasky.yambo.services.UserService;
@@ -10,7 +9,6 @@ import net.cabrasky.yambo.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
