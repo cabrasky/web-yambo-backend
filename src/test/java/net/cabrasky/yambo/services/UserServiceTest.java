@@ -92,19 +92,23 @@ public class UserServiceTest {
     @Test
     public void testLoadUserByUsernameNotEnabledThrowsException() {
         String username = "testuser";
+        String email = "test@example.com";
 
         Role privilege = new Role();
         privilege.setId("ROLE_USER");
 
         User user = new User();
         user.setUsername(username);
+        user.setEmail(email);
         user.setPassword("encodedPassword");
         user.setRoles(Set.of(privilege));
         user.setEnabled(false);
 
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameOrEmail(username, username)).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameOrEmail(email, email)).thenReturn(Optional.of(user));
 
         assertThrows(UserNotEnabledException.class, () -> userService.loadUserByUsername(username));
+        assertThrows(UserNotEnabledException.class, () -> userService.loadUserByUsername(email));
     }
 
     @Test
@@ -119,7 +123,7 @@ public class UserServiceTest {
 
         when(userRepository.findByIsEnabledFalse()).thenReturn(Arrays.asList(user1, user2));
 
-        List<User> unapprovedUsers = userService.geDisabledUsers();
+        List<User> unapprovedUsers = userService.getDisabledUsers();
 
         assertNotNull(unapprovedUsers);
         assertEquals(2, unapprovedUsers.size());
@@ -148,19 +152,30 @@ public class UserServiceTest {
     @Test
     public void testLoadUserByUsernameSuccess() {
         String username = "testuser";
+        String email = "test@example.com";
 
         Role privilege = new Role();
         privilege.setId("ROLE_USER");
 
         User user = new User();
         user.setUsername(username);
+        user.setEmail(email);
         user.setPassword("encodedPassword");
         user.setEnabled(true);
         user.setRoles(Set.of(privilege));
 
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameOrEmail(username, username)).thenReturn(Optional.of(user));
+        when(userRepository.findByUsernameOrEmail(email, email)).thenReturn(Optional.of(user));
 
         UserDetails userDetails = userService.loadUserByUsername(username);
+
+        assertNotNull(userDetails);
+        assertEquals(username, userDetails.getUsername());
+        assertEquals("encodedPassword", userDetails.getPassword());
+        assertTrue(userDetails.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_USER")));
+
+        userDetails = userService.loadUserByUsername(email);
 
         assertNotNull(userDetails);
         assertEquals(username, userDetails.getUsername());
@@ -172,9 +187,12 @@ public class UserServiceTest {
     @Test
     public void testLoadUserByUsernameUserNotFound() {
         String username = "nonexistentuser";
+        String email = "nonexistent@example.com";
 
-        when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+        when(userRepository.findByUsernameOrEmail(username, username)).thenReturn(Optional.empty());
+        when(userRepository.findByUsernameOrEmail(email, email)).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername(username));
+        assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername(email));
     }
 }
