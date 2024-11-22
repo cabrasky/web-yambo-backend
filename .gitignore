@@ -6,3 +6,4 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .vscode
+.vscode/settings.json
