@@ -6,10 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import net.cabrasky.yambo.payloads.request.ContactForm;
+import net.cabrasky.yambo.payloads.response.ErrorResponse;
+import net.cabrasky.yambo.payloads.response.MessageResponse;
 import net.cabrasky.yambo.services.EmailService;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/contact")
@@ -19,15 +18,12 @@ public class ContactController {
     private EmailService emailService;
 
     @PostMapping("/send")
-    public ResponseEntity<Map<String, String>> sendEmail(@RequestBody ContactForm contactForm) {
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<?> sendEmail(@RequestBody ContactForm contactForm) {
         try {
             emailService.sendEmail(contactForm);
-            response.put("message", "Email sent successfully.");
-            return ResponseEntity.ok(response);
+            return new ResponseEntity<>(new MessageResponse("Email sent successfully."), HttpStatus.OK);
         } catch (Exception e) {
-            response.put("error", "Failed to send email: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return new ResponseEntity<>(new ErrorResponse("Failed to send email"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
