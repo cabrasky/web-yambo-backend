@@ -44,7 +44,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public List<User> geDisabledUsers() {
+    public List<User> getDisabledUsers() {
         return userRepository.findByIsEnabledFalse();
     }
 
@@ -53,8 +53,8 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
+    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+        User user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (!user.isEnabled()) {
